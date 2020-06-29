@@ -384,7 +384,7 @@ def main_play(HTTPBase, arglist, redirect=False):
         err_key = args.url + '_err'
         err_cnt = mem_cache.get(err_key)
         err_cnt = 1 if not err_cnt else err_cnt + 1
-        log.warning('err_hancle {0}', err_key, err_cnt)
+        log.warning('err_hancle {0},cunt {1}', err_key, err_cnt)
         # error occur times > SOURCE_CHECK_ERROR_COUNT,will block the args.url access
         mem_cache.set(err_key, err_cnt, SOURCE_CHECK_DURATION)
         if err_cnt > SOURCE_CHECK_ERROR_COUNT:
