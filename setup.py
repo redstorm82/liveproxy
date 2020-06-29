@@ -40,7 +40,7 @@ setup(
     url='https://github.com/back-to/liveproxy',
     project_urls={
         'Documentation': 'https://liveproxy.github.io/',
-        'Source': 'https://github.com/back-to/liveproxy/',
+        'Source': 'https://github.com/redstorm82/liveproxy/',
         'Tracker': 'https://github.com/back-to/liveproxy/issues',
     },
     author='back-to',
