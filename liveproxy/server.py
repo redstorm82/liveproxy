@@ -34,6 +34,11 @@ from .constants import CONFIG_FILES, PLUGINS_DIR, STREAM_SYNONYMS
 from streamlink_cli.argparser import build_parser
 from .shared import logger
 
+'''felix add for protect retry to many times for offline streams{'''
+from .cache import Cache
+
+'''felix add for protect retry to many times for offline streams}'''
+
 ACCEPTABLE_ERRNO = (
     errno.ECONNABORTED,
     errno.ECONNRESET,
@@ -46,6 +51,13 @@ except AttributeError:
     pass  # Not windows
 
 log = logging.getLogger('streamlink.liveproxy-server')
+
+'''felix add for protect retry to many times for offline streams{'''
+SOURCE_CHECK_DURATION = 60 * 5  # seconds
+SOURCE_CHECK_ERROR_COUNT = 5
+SOURCE_BAN_TIME = 60 * 30  # seconds
+mem_cache = Cache()
+'''felix add for protect retry to many times for offline streams}'''
 
 
 class TempData(object):
@@ -367,6 +379,17 @@ def setup_plugin_options(session, args, plugin):
 
 
 def main_play(HTTPBase, arglist, redirect=False):
+    def err_hancle():
+        '''felix add for protect retry to many times for offline streams{'''
+        err_key = args.url + '_err'
+        err_cnt = mem_cache.get(err_key)
+        err_cnt = 1 if not err_cnt else err_cnt + 1
+        # error occur times > SOURCE_CHECK_ERROR_COUNT,will block the args.url access
+        mem_cache.set(err_key, err_cnt, SOURCE_CHECK_DURATION)
+        if err_cnt > SOURCE_CHECK_ERROR_COUNT:
+            mem_cache.set(args.url, err_cnt, SOURCE_BAN_TIME)
+        '''felix add for protect retry to many times for offline streams}'''
+
     parser = build_parser()
     args = setup_args(parser, arglist, ignore_unknown=True)
 
@@ -386,6 +409,13 @@ def main_play(HTTPBase, arglist, redirect=False):
     setup_http_session(session, args)
 
     if args.url:
+        '''felix add for protect retry to many times for offline streams{'''
+        if mem_cache.get(args.url):
+            log.error('Access limited for handle URL: {0},skip for {1} seconds', args.url, SOURCE_BAN_TIME)
+            HTTPBase._headers(404, 'text/html', connection='close')
+            return
+        '''felix add for protect retry to many times for offline streams}'''
+
         setup_options(session, args)
 
         try:
@@ -419,6 +449,7 @@ def main_play(HTTPBase, arglist, redirect=False):
         except FatalPluginError as err:
             log.error('FatalPluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
+            err_hancle()
             return
         except NoPluginError:
             log.error('No plugin can handle URL: {0}', args.url)
@@ -427,11 +458,13 @@ def main_play(HTTPBase, arglist, redirect=False):
         except PluginError as err:
             log.error('PluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
+            err_hancle()
             return
 
         if not streams:
             log.error('No playable streams found on this URL: {0}', args.url)
             HTTPBase._headers(404, 'text/html', connection='close')
+            err_hancle()
             return
 
         if args.default_stream and not args.stream:
