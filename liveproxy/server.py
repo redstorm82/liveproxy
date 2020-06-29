@@ -448,24 +448,25 @@ def main_play(HTTPBase, arglist, redirect=False):
                     stream_types=args.stream_types,
                     sorting_excludes=args.stream_sorting_excludes)
         except FatalPluginError as err:
+            err_hancle()
             log.error('FatalPluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
-            err_hancle()
             return
         except NoPluginError:
+
             log.error('No plugin can handle URL: {0}', args.url)
             HTTPBase._headers(404, 'text/html', connection='close')
             return
         except PluginError as err:
+            err_hancle()
             log.error('PluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
-            err_hancle()
             return
 
         if not streams:
+            err_hancle()
             log.error('No playable streams found on this URL: {0}', args.url)
             HTTPBase._headers(404, 'text/html', connection='close')
-            err_hancle()
             return
 
         if args.default_stream and not args.stream:
