@@ -379,7 +379,7 @@ def setup_plugin_options(session, args, plugin):
 
 
 def main_play(HTTPBase, arglist, redirect=False):
-    def err_hancle():
+    def err_handle():
         '''felix add for protect retry to many times for offline streams{'''
         err_key = args.url + '_err'
         err_cnt = mem_cache.get(err_key)
@@ -448,7 +448,7 @@ def main_play(HTTPBase, arglist, redirect=False):
                     stream_types=args.stream_types,
                     sorting_excludes=args.stream_sorting_excludes)
         except FatalPluginError as err:
-            err_hancle()
+            err_handle()
             log.error('FatalPluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
             return
@@ -458,13 +458,13 @@ def main_play(HTTPBase, arglist, redirect=False):
             HTTPBase._headers(404, 'text/html', connection='close')
             return
         except PluginError as err:
-            err_hancle()
+            err_handle()
             log.error('PluginError {0}', str(err))
             HTTPBase._headers(404, 'text/html', connection='close')
             return
 
         if not streams:
-            err_hancle()
+            err_handle()
             log.error('No playable streams found on this URL: {0}', args.url)
             HTTPBase._headers(404, 'text/html', connection='close')
             return
