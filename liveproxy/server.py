@@ -54,8 +54,8 @@ log = logging.getLogger('streamlink.liveproxy-server')
 
 '''felix add for protect retry to many times for offline streams{'''
 SOURCE_CHECK_DURATION = 60 * 5  # seconds
-SOURCE_CHECK_ERROR_COUNT = 5
-SOURCE_BAN_TIME = 60 * 30  # seconds
+SOURCE_CHECK_ERROR_COUNT = 3
+SOURCE_BAN_TIME = 60 * 60 * 4  # seconds
 mem_cache = Cache()
 '''felix add for protect retry to many times for offline streams}'''
 
